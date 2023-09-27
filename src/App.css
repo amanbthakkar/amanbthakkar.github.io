@@ -37,7 +37,8 @@
     transform: rotate(360deg);
   }
 }
-
-.paragraph-padding {
-  padding: 0 12%;
+@media (min-width: 768px) {
+  .paragraph-padding {
+    padding: 0 12%;
+  }
 }
