@@ -38,7 +38,8 @@ function App() {
             undervalued.
           </p>
           <Image
-            src='https://pythonbtcscript.s3.us-west-1.amazonaws.com/indicator.png'
+            className='paragraph-padding'
+            src='https://pythonbtcscript.s3.us-west-1.amazonaws.com/indicator.png?timestamp=${new Date().getTime()}'
             alt='Bitcoin Indicator'
             fluid
           />
@@ -52,6 +53,7 @@ function App() {
                 fluid
                 className='mb-3'
                 alt='Monkey'
+                style={{ maxWidth: '80%', height: 'auto' }}
               ></Image>
             </p>
             <p className='paragraph-padding'>
