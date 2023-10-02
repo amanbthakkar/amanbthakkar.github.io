@@ -1,9 +1,71 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Image } from 'react-bootstrap';
+
 import './App.css';
 function App() {
+  const apiUrlOldVisitor = process.env.OLD_VISITOR_URL;
+  const apiUrlNewVisitor = process.env.NEW_VISITOR_URL;
+
+  const [visitorCount, setVisitorCount] = useState('Loading...');
+
+  const [showInfo, setShowInfo] = useState(false);
+
+  const handleMouseEnter = () => {
+    setShowInfo(true);
+  };
+
+  const handleMouseLeave = () => {
+    setShowInfo(false);
+  };
+
+  useEffect(() => {
+    async function getVisitorCount() {
+      const hasCookie = document.cookie.includes('lastVisited');
+
+      if (hasCookie) {
+        const response = await fetch(
+          'http://18.144.34.205:8080/api/old-visitor'
+        );
+        const data = await response.json();
+        setVisitorCount(data.count);
+      } else {
+        const response = await fetch(
+          'http://18.144.34.205:8080/api/new-visitor'
+        );
+        const data = await response.json();
+        setVisitorCount(data.count);
+      }
+
+      const expirationTime = new Date();
+      expirationTime.setTime(expirationTime.getTime() + 3 * 60 * 1000); // 3 minutes
+      document.cookie = `lastVisited=true; expires=${expirationTime.toUTCString()}`;
+    }
+    getVisitorCount();
+  }, []);
+
   return (
     <div className='App'>
+      <div className='bg-success text-white p-1'>
+        <h6 className='text-center'>
+          Unique site visits: {visitorCount}{' '}
+          <span
+            className='info-icon'
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            ⓘ
+          </span>
+        </h6>
+        {showInfo && (
+          <div className='info-bar text-center'>
+            This website uses cookies. Only user visits are tracked and no
+            personal information is used or stored.
+            <br />
+            Visit counts are maintained using Redis as cache and database on an
+            Amazon EC2 host.
+          </div>
+        )}
+      </div>
       <div className='bg-light p-5 rounded '>
         <Container className='text-center'>
           <h1>Is It A Good Time To Buy Bitcoin?</h1>
