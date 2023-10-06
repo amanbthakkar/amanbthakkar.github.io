@@ -23,11 +23,15 @@ function App() {
       const hasCookie = document.cookie.includes('lastVisited');
 
       if (hasCookie) {
-        const response = await fetch(apiUrlOldVisitor);
+        const response = await fetch(
+          'https://cloud.amanthakkar.com/api/old-visitor'
+        );
         const data = await response.json();
         setVisitorCount(data.count);
       } else {
-        const response = await fetch(apiUrlNewVisitor);
+        const response = await fetch(
+          'https://cloud.amanthakkar.com/api/new-visitor'
+        );
         const data = await response.json();
         setVisitorCount(data.count);
       }
