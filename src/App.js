@@ -23,15 +23,11 @@ function App() {
       const hasCookie = document.cookie.includes('lastVisited');
 
       if (hasCookie) {
-        const response = await fetch(
-          'http://18.144.34.205:8080/api/old-visitor'
-        );
+        const response = await fetch(apiUrlOldVisitor);
         const data = await response.json();
         setVisitorCount(data.count);
       } else {
-        const response = await fetch(
-          'http://18.144.34.205:8080/api/new-visitor'
-        );
+        const response = await fetch(apiUrlNewVisitor);
         const data = await response.json();
         setVisitorCount(data.count);
       }
