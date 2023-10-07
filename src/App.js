@@ -103,19 +103,21 @@ function App() {
           <div className='tldr-section'>
             <p className='paragraph-padding'>
               <h6 className='mb-3'>How do I interpret this?</h6>
-              The oscillator can be used as a tool that helps us understand if
-              Bitcoin's price is too high or too low compared to its historical
-              patterns. Think of it like a gauge. It looks at Bitcoin's current
-              price and compares it to where it's expected to be "on average"
-              based on past data. When the gauge is in the red zone, it might
-              mean Bitcoin is getting overvalued, and selling could be a good
-              idea. But when it's in the blue zone, it might be a good time to
-              buy because Bitcoin could be undervalued.{' '}
+              The oscillator (a value that lies between -1 and 1) can be used as
+              a tool that helps us understand if Bitcoin's price is too high or
+              too low compared to its historical patterns. Think of it like a
+              gauge. It looks at Bitcoin's current price and compares it to
+              where it's expected to be "on average" based on past data. When
+              the gauge is in the red zone, it might mean Bitcoin is getting
+              overvalued, and selling could be a good idea. But when it's in the
+              blue zone, it might be a good time to buy because Bitcoin could be
+              undervalued.{' '}
             </p>
             <p className='paragraph-padding'>
-              The plot above shows at which percentile of the oscillator the
-              price of Bitcoin lies at any given time. Blue regions are closer
-              to the 10th percentile, while red regions are closer to the 90th
+              The plot above is a scatterplot of Bitcoin's price color-coded on
+              which percentile the oscillator value belongs to at any given
+              point in time (read the article). Blue regions are closer to the
+              10th percentile, while red regions are closer to the 90th
               percentile.
             </p>
             <p className='paragraph-padding'>
