@@ -42,3 +42,14 @@
     padding: 0 12%;
   }
 }
+
+.update-text {
+  font-size: 12px;
+  color: #888; /* or any color you prefer */
+  margin-bottom: 10px; /* Add margin to separate it from the rest of the content */
+}
+
+.image-container {
+  min-width: 500px; /* Adjust the minimum height as needed */
+  overflow-x: auto; /* Add vertical scroll if content overflows */
+}
