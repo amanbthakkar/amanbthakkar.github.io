@@ -1,1 +1,1 @@
-[<a href="[amanbthakkar.github.io](https://amanbthakkar.github.io/)" target="_blank">View this website :)</a>](https://amanbthakkar.github.io/)https://amanbthakkar.github.io/
+<a href="https://www.amanthakkar.com" target="_blank">View the website :)</a>
