@@ -1,81 +1,108 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Image } from 'react-bootstrap';
 
+import VisitorStats from './VisitorStats';
+import {
+  getVisitorCount,
+  getStats,
+  recordNewVisitor,
+  recordReturningVisitor,
+} from './analytics';
+
 import './App.css';
+
+const COOKIE_NAME = 'lastVisited';
+const COOKIE_MINUTES = 3;
+
 function App() {
-  const apiUrlOldVisitor = process.env.OLD_VISITOR_URL;
-  const apiUrlNewVisitor = process.env.NEW_VISITOR_URL;
-
-  const [visitorCount, setVisitorCount] = useState('Loading...');
-
+  const [total, setTotal] = useState(null);
+  const [baseline, setBaseline] = useState(null);
+  const [live, setLive] = useState(null);
+  const [sources, setSources] = useState([]);
+  const [offline, setOffline] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
-  const handleMouseEnter = () => {
-    setShowInfo(true);
-  };
-
-  const handleMouseLeave = () => {
-    setShowInfo(false);
-  };
-
   useEffect(() => {
-    async function getVisitorCount() {
-      const hasCookie = document.cookie.includes('lastVisited');
+    let cancelled = false;
 
+    async function loadAnalytics() {
+      const hasCookie = document.cookie.includes(COOKIE_NAME);
+      const urlParams = new URLSearchParams(window.location.search);
+      const sourceParam = urlParams.get('source');
+
+      let countResult;
       if (hasCookie) {
-        const response = await fetch(
-          `https://cloud.amanthakkar.com/api/old-visitor`
-        );
-        const data = await response.json();
-        setVisitorCount(data.count);
+        countResult = await recordReturningVisitor();
       } else {
-        // grab the source from the url, if any
-        const urlParams = new URLSearchParams(window.location.search);
-        const sourceParam = urlParams.get('source');
-
-        const response = await fetch(
-          `https://cloud.amanthakkar.com/api/new-visitor/?source=${sourceParam}`
-        );
-        const data = await response.json();
-        setVisitorCount(data.count);
+        countResult = await recordNewVisitor(sourceParam);
+        const expiration = new Date();
+        expiration.setTime(expiration.getTime() + COOKIE_MINUTES * 60 * 1000);
+        document.cookie = `${COOKIE_NAME}=true; expires=${expiration.toUTCString()}; path=/`;
       }
 
-      const expirationTime = new Date();
-      expirationTime.setTime(expirationTime.getTime() + 3 * 60 * 1000); // 3 minutes
-      document.cookie = `lastVisited=true; expires=${expirationTime.toUTCString()}`;
+      const [statsResult, visitorResult] = await Promise.all([
+        getStats(),
+        getVisitorCount(),
+      ]);
+
+      if (cancelled) return;
+
+      const resolved = visitorResult.total ?? countResult.total ?? '—';
+      setTotal(resolved);
+      setBaseline(visitorResult.baseline ?? statsResult.baseline);
+      setLive(visitorResult.live ?? statsResult.live);
+      setSources(statsResult.sources || []);
+      setOffline(visitorResult.offline || statsResult.offline || countResult.offline);
     }
-    getVisitorCount();
+
+    loadAnalytics();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const chartSrc = `https://pythonbtcscript.s3.us-west-1.amazonaws.com/indicator.png?timestamp=${Date.now()}`;
 
   return (
     <div className='App'>
       <div className='bg-success text-white p-1'>
-        <h6 className='text-center'>
-          Unique site visits: {visitorCount}{' '}
+        <VisitorStats
+          total={total ?? '…'}
+          baseline={baseline}
+          live={live}
+          sources={sources}
+          offline={offline}
+          showBreakdown={!offline && sources.length > 0}
+        />
+        <div className='text-center'>
           <span
             className='info-icon'
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setShowInfo(true)}
+            onMouseLeave={() => setShowInfo(false)}
+            role='button'
+            tabIndex={0}
+            aria-label='Privacy info'
           >
+            {' '}
             ⓘ
           </span>
-        </h6>
+        </div>
         {showInfo && (
-          <div className='info-bar text-center'>
-            This website uses cookies. Only user visits are tracked and no
-            personal information is used or stored.
-            <br />
-            Visit counts are maintained using Redis as cache and database on an
-            Amazon EC2 host.
+          <div className='info-bar text-center small'>
+            Visit counts use a short-lived cookie to avoid double-counting repeat
+            views in one session. Counts are stored on a self-hosted Raspberry Pi
+            backend (Redis). No personal data is collected.
           </div>
         )}
       </div>
+
       <div className='bg-light p-5 rounded '>
         <Container className='text-center'>
           <h1>Is It A Good Time To Buy Bitcoin?</h1>
           <h6>The 21 million Bitcoin question</h6>
         </Container>
       </div>
+
       <Container>
         <Container className='mt-5 ml-55 mr-55'>
           <p className='paragraph-padding'>
@@ -88,17 +115,17 @@ function App() {
             <a
               href='https://medium.com/datadriveninvestor/bitcoins-power-law-oscillator-the-code-a-summary-and-a-suggested-improvement-b78b59a2bc9c'
               target='_blank'
-              // rel='noopener noreferrer'
+              rel='noopener noreferrer'
             >
               give it a read!
             </a>
           </p>
           <p className='update-text paragraph-padding'>
             The following image is updated daily at midnight
-          </p>{' '}
+          </p>
           <Image
             className='paragraph-padding image-container'
-            src='https://pythonbtcscript.s3.us-west-1.amazonaws.com/indicator.png?timestamp=${new Date().getTime()}'
+            src={chartSrc}
             alt='Bitcoin Indicator'
             fluid
           />
@@ -115,7 +142,7 @@ function App() {
               the gauge is in the red zone, it might mean Bitcoin is getting
               overvalued, and selling could be a good idea. But when it's in the
               blue zone, it might be a good time to buy because Bitcoin could be
-              undervalued.{' '}
+              undervalued.
             </p>
             <p className='paragraph-padding'>
               The plot above is a scatterplot of Bitcoin's price color-coded on
@@ -132,14 +159,9 @@ function App() {
                 className='mb-3'
                 alt='Monkey'
                 style={{ maxWidth: '60%', height: 'auto' }}
-              ></Image>
+              />
             </p>
-
-            <p className='paragraph-padding'>
-              {' '}
-              Buy when dark blue, sell when dark red.
-            </p>
-
+            <p className='paragraph-padding'>Buy when dark blue, sell when dark red.</p>
             <p className='paragraph-padding'>
               It's important to note that the oscillator is not flawless and
               should not be the sole basis for investment decisions (don't sue

@@ -1,0 +1,43 @@
+.visitor-stats {
+  position: relative;
+}
+
+.offline-badge {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  font-weight: normal;
+}
+
+.stats-toggle {
+  text-decoration: underline !important;
+  vertical-align: baseline;
+}
+
+.stats-list {
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+}
+
+.stats-label {
+  text-align: left;
+}
+
+.stats-count {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stats-pct {
+  opacity: 0.8;
+}
